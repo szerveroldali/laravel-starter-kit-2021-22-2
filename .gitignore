@@ -12,3 +12,19 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# Additional
+# -----------
+composer.lock
+package-lock.json
+/zipfiles
+/temp
+/public/app.css
+/public/app.js
+/public/css
+/public/js
+/public/fonts
+/public/webfonts
+
+# Local History for Visual Studio Code
+.history/
