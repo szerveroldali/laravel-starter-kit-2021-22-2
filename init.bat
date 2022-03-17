@@ -1,22 +1,25 @@
-:: Composer csomagok telepitese mindenfele interakcio es konzolra iras nelkul
+:: With this script you can initialize from scratch this Laravel project in Windows
+
+:: Installing dependencies without any interaction and output
 call composer install --no-interaction --quiet
-:: .env fajl elkeszitese, majd key generalas
-:: A kezdocsomagban jo a .env.example fajl, nem kell utolag atirni a db-t
+:: Creating the .env file, and generating a new application key
+:: The .env.example file in the starter kit contains all the necessary modifications, so we can use it
+:: It is not necessary to rewrite the DB configuration
 copy .env.example .env
 call php artisan key:generate
-:: NPM-es csomagok telepitese, szinten csendes modban
+:: Installing JavaScript dependencies quietly
 call npm install --silent
-:: frontend oldali asset-ek kigeneralasa
+:: Generate front-end assets
 call npm run dev
-:: Ures database/database.sqlite fajl eloallitasa, hogy a migration mukodjon
+:: Creating an empty database file to make migartions run: database/database.sqlite
 type nul > database/database.sqlite
-:: Fresh migration keszitese
+:: Creating a fresh migration
 call php artisan migrate:fresh
-:: Adatok seedelese
+:: Seed the database
 call php artisan db:seed
-:: A .gitignore-s zippeles miatt nincs public, es enelkul nem megy a symlink creation
+:: Prepare a folder for file upload
 mkdir .\storage\app\public
-:: Symlink keszitese, alap config szerint a /public/storage-rol a /storage/app/public-ra
+:: Creating a symlink: /public/storage --> /storage/app/public
 call php artisan storage:link
-:: App elinditasa
+:: Starting the app
 call php artisan serve

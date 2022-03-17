@@ -1,7 +1,7 @@
 <?php
 
-// Nyilatkozat ellenőrző és projekt zippelő Laravel beadandókhoz
-// Készítette Tóta Dávid
+// Statement checker and project zipper for Laravel home projects
+// Created by Tóta Dávid
 
 namespace App\Console\Commands;
 
@@ -20,10 +20,10 @@ class zip extends Command
     protected $description = 'Creates zip file from your assignment';
 
     // Nyilatkozat base64-be kódolva (template, tehát <NAME>, <NEPTUN>, <DATE> nélkül)
-    const statement_preview = "S2lqZWxlbnRlbSwgaG9neSBlenQgYSBtZWdvbGTDoXN0IMOpbiBrw7xsZHRlbSBiZSBhIFN6ZXJ2ZXJvbGRhbGkgd2VicHJvZ3JhbW96w6FzIExhcmF2ZWwgYmVhZGFuZMOzIGZlbGFkYXTDoWhvei4KQSBmZWxhZGF0IGJlYWTDoXPDoXZhbCBlbGlzbWVyZW0sIGhvZ3kgdHVkb23DoXN1bCB2ZXR0ZW0gYSBueWlsYXRrb3phdGJhbiBmb2dsYWx0YWthdC4KCi0gS2lqZWxlbnRlbSwgaG9neSBleiBhIG1lZ29sZMOhcyBhIHNhasOhdCBtdW5rw6FtLgotIEtpamVsZW50ZW0sIGhvZ3kgbmVtIG3DoXNvbHRhbSB2YWd5IGhhc3puw6FsdGFtIGhhcm1hZGlrIGbDqWx0xZFsIHN6w6FybWF6w7MgbWVnb2xkw6Fzb2thdC4KLSBLaWplbGVudGVtLCBob2d5IG5lbSB0b3bDoWJiw610b3R0YW0gbWVnb2xkw6FzdCBoYWxsZ2F0w7N0w6Fyc2FpbW5haywgw6lzIG5lbSBpcyB0ZXR0ZW0gYXp0IGvDtnp6w6kuCi0gVHVkb23DoXN1bCB2ZXR0ZW0sIGhvZ3kgYXogRcO2dHbDtnMgTG9yw6FuZCBUdWRvbcOhbnllZ3lldGVtIEhhbGxnYXTDs2kgS8O2dmV0ZWxtw6lueXJlbmRzemVyZSAoRUxURSBzemVydmV6ZXRpIMOpcyBtxbFrw7Zkw6lzaSBzemFiw6FseXphdGEsIElJLiBLw7Z0ZXQsIDc0L0MuIMKnKSBraW1vbmRqYSwgaG9neSBtaW5kYWRkaWcsIGFtw61nIGVneSBoYWxsZ2F0w7MgZWd5IG3DoXNpayBoYWxsZ2F0w7MgbXVua8OhasOhdCAtIHZhZ3kgbGVnYWzDoWJiaXMgYW5uYWsgamVsZW50xZFzIHLDqXN6w6l0IC0gc2Fqw6F0IG11bmvDoWpha8OpbnQgbXV0YXRqYSBiZSwgYXogZmVneWVsbWkgdsOpdHPDqWduZWsgc3rDoW3DrXQuCi0gVHVkb23DoXN1bCB2ZXR0ZW0sIGhvZ3kgYSBmZWd5ZWxtaSB2w6l0c8OpZyBsZWdzw7pseW9zYWJiIGvDtnZldGtlem3DqW55ZSBhIGhhbGxnYXTDsyBlbGJvY3PDoXTDoXNhIGF6IGVneWV0ZW1yxZFsLgo=";
+    const statement_preview = "VGhpcyBzb2x1dGlvbiB3YXMgc3VibWl0dGVkIGFuZCBwcmVwYXJlZCBieSBtZSBmb3IgdGhlIExhcmF2ZWwgaG9tZSBhc3NpZ25tZW50IG9mIHRoZSBXZWIgZW5naW5lZXJpbmcgY291cnNlLgpCeSBzdWJtaXR0aW5nIHRoaXMgYXNzaWdubWVudCwgSSBhY2tub3dsZWRnZSB0aGF0IEkgaGF2ZSB0YWtlbiBub3RlIG9mIHRoZSBzdGF0ZW1lbnRzIGJlbG93OgoKLSBJIGRlY2xhcmUgdGhhdCB0aGlzIHNvbHV0aW9uIGlzIG15IG93biB3b3JrLgotIEkgaGF2ZSBub3QgY29waWVkIG9yIHVzZWQgdGhpcmQgcGFydHkgc29sdXRpb25zLgotIEkgaGF2ZSBub3QgcGFzc2VkIG15IHNvbHV0aW9uIHRvIG15IGNsYXNzbWF0ZXMsIG5laXRoZXIgIG1hZGUgaXQgcHVibGljLgotIFN0dWRlbnRz4oCZIHJlZ3VsYXRpb24gb2YgRcO2dHbDtnMgTG9yw6FuZCBVbml2ZXJzaXR5IChFTFRFIFJlZ3VsYXRpb25zIFZvbC4gSUkuIDc0L0MuIMKnICkgc3RhdGVzIHRoYXQgYXMgbG9uZyBhcyBhIHN0dWRlbnQgcHJlc2VudHMgYW5vdGhlciBzdHVkZW504oCZcyB3b3JrIC0gb3IgYXQgbGVhc3QgdGhlIHNpZ25pZmljYW50IHBhcnQgb2YgaXQgLSBhcyBoaXMvaGVyIG93biBwZXJmb3JtYW5jZSwgaXQgd2lsbCBjb3VudCBhcyBhIGRpc2NpcGxpbmFyeSBmYXVsdC4gVGhlIG1vc3Qgc2VyaW91cyBjb25zZXF1ZW5jZSBvZiBhIGRpc2NpcGxpbmFyeSBmYXVsdCBjYW4gYmUgZGlzbWlzc2FsIG9mIHRoZSBzdHVkZW50IGZyb20gdGhlIFVuaXZlcnNpdHkuCg==";
 
     // Nyilatkozat template (<NÉV>, <NEPTUN>, <DATE> mellékelve, amibe behelyettesíthetők az adatok)
-    const statement_template = "IyBOeWlsYXRrb3phdAoKw4luLCA8TkFNRT4gKE5lcHR1biBrw7NkOiA8TkVQVFVOPikga2lqZWxlbnRlbSwgaG9neSBlenQgYSBtZWdvbGTDoXN0IMOpbiBrw7xsZHRlbSBiZSBhIFN6ZXJ2ZXJvbGRhbGkgd2VicHJvZ3JhbW96w6FzIExhcmF2ZWwgYmVhZGFuZMOzIGZlbGFkYXTDoWhvei4KQSBmZWxhZGF0IGJlYWTDoXPDoXZhbCBlbGlzbWVyZW0sIGhvZ3kgdHVkb23DoXN1bCB2ZXR0ZW0gYSBueWlsYXRrb3phdGJhbiBmb2dsYWx0YWthdC4KCi0gS2lqZWxlbnRlbSwgaG9neSBleiBhIG1lZ29sZMOhcyBhIHNhasOhdCBtdW5rw6FtLgotIEtpamVsZW50ZW0sIGhvZ3kgbmVtIG3DoXNvbHRhbSB2YWd5IGhhc3puw6FsdGFtIGhhcm1hZGlrIGbDqWx0xZFsIHN6w6FybWF6w7MgbWVnb2xkw6Fzb2thdC4KLSBLaWplbGVudGVtLCBob2d5IG5lbSB0b3bDoWJiw610b3R0YW0gbWVnb2xkw6FzdCBoYWxsZ2F0w7N0w6Fyc2FpbW5haywgw6lzIG5lbSBpcyB0ZXR0ZW0gYXp0IGvDtnp6w6kuCi0gVHVkb23DoXN1bCB2ZXR0ZW0sIGhvZ3kgYXogRcO2dHbDtnMgTG9yw6FuZCBUdWRvbcOhbnllZ3lldGVtIEhhbGxnYXTDs2kgS8O2dmV0ZWxtw6lueXJlbmRzemVyZSAoRUxURSBzemVydmV6ZXRpIMOpcyBtxbFrw7Zkw6lzaSBzemFiw6FseXphdGEsIElJLiBLw7Z0ZXQsIDc0L0MuIMKnKSBraW1vbmRqYSwgaG9neSBtaW5kYWRkaWcsIGFtw61nIGVneSBoYWxsZ2F0w7MgZWd5IG3DoXNpayBoYWxsZ2F0w7MgbXVua8OhasOhdCAtIHZhZ3kgbGVnYWzDoWJiaXMgYW5uYWsgamVsZW50xZFzIHLDqXN6w6l0IC0gc2Fqw6F0IG11bmvDoWpha8OpbnQgbXV0YXRqYSBiZSwgYXogZmVneWVsbWkgdsOpdHPDqWduZWsgc3rDoW3DrXQuCi0gVHVkb23DoXN1bCB2ZXR0ZW0sIGhvZ3kgYSBmZWd5ZWxtaSB2w6l0c8OpZyBsZWdzw7pseW9zYWJiIGvDtnZldGtlem3DqW55ZSBhIGhhbGxnYXTDsyBlbGJvY3PDoXTDoXNhIGF6IGVneWV0ZW1yxZFsLgoKS2VsdDogPERBVEU+Cg==";
+    const statement_template = "IyBTdGF0ZW1lbnQKCkksIDxOQU1FPiAoTmVwdHVuIGNvZGU6IDxORVBUVU4+KSwgZGVjbGFyZSB0aGF0IEkgaGF2ZSBzdWJtaXR0ZWQgdGhpcyBzb2x1dGlvbiBmb3IgdGhlIExhcmF2ZWwgaG9tZSBhc3NpZ25tZW50IG9mIHRoZSBXZWIgZW5naW5lZXJpbmcgY291cnNlLgpCeSBzdWJtaXR0aW5nIHRoaXMgYXNzaWdubWVudCwgSSBhY2tub3dsZWRnZSB0aGF0IEkgaGF2ZSB0YWtlbiBub3RlIG9mIHRoZSBzdGF0ZW1lbnRzIGJlbG93OgoKLSBJIGRlY2xhcmUgdGhhdCB0aGlzIHNvbHV0aW9uIGlzIG15IG93biB3b3JrLgotIEkgZGVjbGFyZSB0aGF0IEkgaGF2ZSBub3QgY29waWVkIG9yIHVzZWQgdGhpcmQgcGFydHkgc29sdXRpb25zLgotIEkgZGVjbGFyZSB0aGF0IEkgaGF2ZSBub3QgcGFzc2VkIG15IHNvbHV0aW9uIHRvIG15IGNsYXNzbWF0ZXMsIG5laXRoZXIgIG1hZGUgaXQgcHVibGljLgotIEkgYWNrbm93bGVkZ2VkIHRoYXQgdGhlIFN0dWRlbnRz4oCZIHJlZ3VsYXRpb24gb2YgRcO2dHbDtnMgTG9yw6FuZCBVbml2ZXJzaXR5IChFTFRFIFJlZ3VsYXRpb25zIFZvbC4gSUkuIDc0L0MuIMKnICkgc3RhdGVzIHRoYXQgYXMgbG9uZyBhcyBhIHN0dWRlbnQgcHJlc2VudHMgYW5vdGhlciBzdHVkZW504oCZcyB3b3JrIC0gb3IgYXQgbGVhc3QgdGhlIHNpZ25pZmljYW50IHBhcnQgb2YgaXQgLSBhcyBoaXMvaGVyIG93biBwZXJmb3JtYW5jZSwgaXQgd2lsbCBjb3VudCBhcyBhIGRpc2NpcGxpbmFyeSBmYXVsdC4gCi0gSSBhY2tub3dsZWRnZWQgdGhhdCB0aGUgbW9zdCBzZXJpb3VzIGNvbnNlcXVlbmNlIG9mIGEgZGlzY2lwbGluYXJ5IGZhdWx0IGNhbiBiZSBkaXNtaXNzYWwgb2YgdGhlIHN0dWRlbnQgZnJvbSB0aGUgVW5pdmVyc2l0eS4KCkRhdGVkOiA8REFURT4K";
 
     // Azok a mappák, amelyeknek mindenképpen jelen kell lenniük a zippelés pillanatában. Ha valamelyik nem található, akkor a hallgató hibát kap, és a rendszer kiírja neki, hogy melyek azok a mappák, amik ezek közül hiányoznak.
     const required_dirs = [
@@ -189,45 +189,45 @@ class zip extends Command
             if ($checksum && $name && $neptun) {
                 $statement = file_get_contents(base_path('STATEMENT.txt'));
                 if (sha1($statement) === $checksum) {
-                    $this->io->success("A nyilatkozat korábban már ki lett töltve " . $name . " névre és " . $neptun . " Neptun kódra.");
-                    $this->io->note("Ha a fenti adatok tévesek, akkor töröld ki a STATEMENT.txt fájlt, majd hívd meg újra a zip parancsot, ilyenkor újra meg fog jelenni a nyilatkozat kitöltő.");
+                    $this->io->success("The statement has previously been filled in with the name " . $name . " and the Neptun code " . $neptun . ".");
+                    $this->io->note("If the above information is incorrect, delete the STATEMENT.txt file and call the zip command again, and the statement filler will reappear.");
                     $this->newLine();
                     return true;
                 } else {
-                    $this->warn("A korábban kitöltött nyilatkozat ellenőrzése nem sikerült, ezért újra ki kell tölteni.");
+                    $this->warn("The previously created statement could not be verified and must be completed again.");
                     $this->newLine();
                 }
             }
         }
         // Nyilatkozat megjelenítése a hallgatónak, majd az elfogadás, és az adatok bekérése
-        $this->line('NYILATKOZAT:');
+        $this->line('STATEMENT:');
         $this->newLine();
         $this->line(base64_decode(self::statement_preview));
         $this->newLine();
-        if ($this->confirm('Elolvastad, elfogadod, és magadra nézve kötelező érvényűnek tekinted a fenti nyilatkozatot?')) {
-            $this->info("Kérjük, add meg a nevedet és a Neptun kódodat, hogy be tudjuk helyettesíteni azokat a nyilatkozatba.");
+        if ($this->confirm('Have you read, accept and consider the above statement on you?')) {
+            $this->info("Please enter your name and Neptun code so we can replace them in the statement.");
             // Név bekérése
-            $name = $this->validatedAsk('Mi a neved?', [
+            $name = $this->validatedAsk('What is your name?', [
                 'required',
                 'min:3',
                 'max:128',
                 'regex:/^[\pL\s\-]+$/u'
             ], [
-                'required' => 'A név megadása kötelező.',
-                'min' => 'A név hossza legalább :min karakter.',
-                'max' => 'A név nem lehet hosszabb, mint :max karakter.',
-                'regex' => 'A név alfanumerikus karakterekből és szóközökből állhat.'
+                'required' => 'The name is required.',
+                'min' => 'Name should be at least :min characters long.',
+                'max' => 'The name cannot be longer than :max characters.',
+                'regex' => 'The name can consist of alphanumeric characters and spaces.'
             ]);
             // Neptun kód bekérése
-            $neptun = Str::upper($this->validatedAsk('Mi a Neptun kódod?', [
+            $neptun = Str::upper($this->validatedAsk('What is your Neptun code?', [
                 'required',
                 'string',
                 'size:6',
                 'regex:/[a-zA-Z0-9]/'
             ], [
-                'required' => 'A Neptun kód megadása kötelező.',
-                'size' => 'A Neptun kód hossza pontosan :size karakter.',
-                'regex' => 'A Neptun kód csak A-Z karakterekből és számokból állhat.'
+                'required' => 'The Neptun code is required.',
+                'size' => 'Neptun code has an exact length of :size characters.',
+                'regex' => 'The Neptun code can only consist of A-Z characters and numbers.'
             ]));
             // Aktuális dátum
             $date = Carbon::now('Europe/Budapest')->isoFormat('Y. MM. DD. kk:MM:ss');
@@ -242,10 +242,10 @@ class zip extends Command
             Cache::set('statement_name', $name);
             Cache::set('statement_neptun_code', $neptun);
             //
-            $this->io->success("A nyilatkozat kitöltése sikeresen megtörtént " . $name . " névre és " . $neptun . " Neptun kódra.");
-            $this->io->note("Ha a fenti adatok tévesek, akkor töröld ki a STATEMENT.txt fájlt, majd hívd meg újra a zip parancsot, ilyenkor újra meg fog jelenni a nyilatkozat kitöltő.");
+            $this->io->success("The statement was successfully filled in with the name " . $name ." and Neptun code " . $neptun . ".");
+            $this->io->note("If the above information is incorrect, delete the STATEMENT.txt file and call the zip command again, and the statement filler will reappear.");
         } else {
-            $this->error('A nyilatkozat a tárgy követelményei szerint kötelező a beadandó leadásához és az értékelés megszerzéséhez.');
+            $this->error('The statement is required according to the requirements of the subject to be submitted and to obtain the grade.');
             return false;
         }
         $this->newLine();
@@ -323,13 +323,13 @@ class zip extends Command
         if (count($files_diff) > 0) {
             $error = true;
             $this->io->error([
-                'Ezekre a fájlokra szükség van:',
+                'These files are required:',
                 ...$files_diff
             ]);
         }
 
         if (!$error) {
-            $this->io->success('Az előzetes, automatizált ellenőrzéseink szerint a projekted rendben van.');
+            $this->io->success('According to our preliminary, automated checks, your project is validated.');
         }
         return !$error;
     }
@@ -338,7 +338,7 @@ class zip extends Command
         // zipfiles elkészítése, ha még nem létezik
         if (!(file_exists(base_path('zipfiles')) && is_dir(base_path('zipfiles')))) {
             mkdir(base_path('zipfiles'));
-            $this->info("zipfiles mappa létrehozva a zip fájlok számára");
+            $this->info("zipfiles folder created for zip files");
         }
         // Adatok összegyűjtése
         $date = Carbon::now('Europe/Budapest')->isoFormat('YMMDD_kkMMssS');
@@ -355,28 +355,28 @@ class zip extends Command
 
         // zip méretének ellenőrzése
         $zip_size = \ByteUnits\bytes(filesize($zip_name));
-        $this->io->success('A zip fájl elkészült: ' . $zip_name . ' (méret: ' . $zip_size->format('kB') . ')');
-        $this->io->note('A feladat megfelelő, hiánytalan beadása a hallgató felelőssége, ezért mindenképp ellenőrizd azt, mielőtt beadod!');
-        $this->io->note('A legjobb, ha kicsomagolod és telepíted a feladatban látható parancsokkal, hogy minden jól működik-e, mintha az oktatók javítanák!');
+        $this->io->success('The zip file is complete: ' . $zip_name . ' (size: ' . $zip_size->format('kB') . ')');
+        $this->io->note('Proper and complete submission of the assignment is the responsibility of the student, so be sure to check it before submitting!');
+        $this->io->note('It’s best to unzip and install with the commands you see in the task to see if everything works fine!');
 
         // Nagy méretű zip fájl esetén figyelmeztessük a hallgatót, valószínűleg bennehagyott valamit, amire nincs is szükség
         if ($zip_size->isGreaterThan(\ByteUnits\Binary::megabytes(2))) {
-            $this->io->warning('A zip fájl mérete nagyobb a megszokottnál, kérjük ellenőrid, vannak-e benne felesleges dolgok, pl. képek, stb!');
+            $this->io->warning('The size of the zip file is larger than usual, please check if there are any unnecessary things in it, e.g. pictures, etc!');
         } else if ($zip_size->isGreaterThan(\ByteUnits\Binary::megabytes(10))) {
-            $this->io->error('A zip fájl mérete JÓVAL nagyobb a megszokottnál, kérjük ellenőrid, vannak-e benne felesleges dolgok, pl. képek, stb!');
+            $this->io->error('The size of the zip file is MUCH larger than usual, please check if there are any unnecessary things in it, e.g. pictures, etc!');
         }
         return true;
     }
 
     public function handle() {
         $this->io = new SymfonyStyle($this->input, $this->output);
-        $this->io->title('Szerveroldali webprogramozás - Automatikus zippelő Laravelhez');
+        $this->io->title('Web engineering - Automatic zipper for Laravel');
         $this->init();
-        $this->io->section('1. lépés: Nyilatkozat');
+        $this->io->section('1. step: Statement');
         if ($this->statement()) {
-            $this->io->section('2. lépés: Projekt ellenőrzése');
+            $this->io->section('2. step: Checking the project');
             if ($this->check()) {
-                $this->io->section('3. lépés: Becsomagolás');
+                $this->io->section('3. step: Creating zip file');
                 $this->zip();
             }
         }

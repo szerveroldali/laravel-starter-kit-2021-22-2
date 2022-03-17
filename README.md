@@ -1,7 +1,9 @@
-# Szerveroldali webprogramozás
-## Laravel kezdőcsomag
+# Web engineering -- Laravel starter kit
 
-- PHP, Composer telepítő: https://github.com/totadavid95/PhpComposerInstaller
-- Kezdőcsomag inicializálása: letöltés után hívd meg az `init.bat` fájlt Windowson vagy az `init.sh` fájlt Linux-on.
-- Zippelő használata: `php artisan zip`, majd a `zipfiles` mappában megtalálható lesz a becsomagolt beadandó.
-- Laravel projektszerkezet: https://github.com/szerveroldali/leirasok/blob/main/LaravelProjektszerkezet.md
+## How to use it
+
+1. Prepare your PHP environment. For this, you can download and use the [PHP, Composer installer](https://github.com/totadavid95/PhpComposerInstaller).
+2. Install [Node.js](https://nodejs.org/en/) for the client-side assets.
+3. Initialize your project by calling `init.bat` on Windows or `init.sh` on Linux.
+4. Implement your solution!
+5. Before submission call `php artisan zip` to create statement, to check the project, and create zip file. The final version can be found in the `zipfiles` folder.
