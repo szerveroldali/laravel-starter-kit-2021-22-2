@@ -129,7 +129,7 @@ class zip extends Command
         'resources/css/app.css',
         'resources/js/app.js',
         'resources/js/bootstrap.js',
-        'resources/views/welcome.blade.php',
+        //'resources/views/welcome.blade.php',
         'routes/api.php',
         'routes/channels.php',
         'routes/console.php',
