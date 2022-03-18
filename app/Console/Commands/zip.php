@@ -152,7 +152,7 @@ class zip extends Command
         parent::__construct();
     }
 
-    private function init() {
+    private function scanProject() {
         // Project beolvasása
         $this->content = $this->scan('.', [
             Gitignore::loadFromStrings([
@@ -160,6 +160,8 @@ class zip extends Command
                 'app/Console/Commands/zip.php'
             ])
         ]);
+        // STATEMENT.txt hozzáadása utólag, mivel szerepel a .gitignore-ban
+        $this->content['files'][] = 'STATEMENT.txt';
     }
 
     // Validálással kibővített console ask
@@ -373,7 +375,7 @@ class zip extends Command
         $this->io->title('Web engineering - Automatic zipper for Laravel');
         $this->io->section('1. step: Statement');
         if ($this->statement()) {
-            $this->init();
+            $this->scanProject();
             $this->io->section('2. step: Checking the project');
             if ($this->check()) {
                 $this->io->section('3. step: Creating zip file');
