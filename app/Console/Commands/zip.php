@@ -371,9 +371,9 @@ class zip extends Command
     public function handle() {
         $this->io = new SymfonyStyle($this->input, $this->output);
         $this->io->title('Web engineering - Automatic zipper for Laravel');
-        $this->init();
         $this->io->section('1. step: Statement');
         if ($this->statement()) {
+            $this->init();
             $this->io->section('2. step: Checking the project');
             if ($this->check()) {
                 $this->io->section('3. step: Creating zip file');
