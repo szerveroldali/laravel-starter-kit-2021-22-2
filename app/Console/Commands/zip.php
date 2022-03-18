@@ -2,13 +2,13 @@
 
 // Statement checker and project zipper for Laravel home projects
 // Created by Tóta Dávid
+// https://github.com/totadavid95
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -19,13 +19,13 @@ class zip extends Command
     protected $signature = 'zip';
     protected $description = 'Creates zip file from your assignment';
 
-    // Nyilatkozat base64-be kódolva (template, tehát <NAME>, <NEPTUN>, <DATE> nélkül)
+    // Statement preview coded into base64 (without template tags: <NAME>, <NEPTUN>, <DATE>)
     const statement_preview = "VGhpcyBzb2x1dGlvbiB3YXMgc3VibWl0dGVkIGFuZCBwcmVwYXJlZCBieSBtZSBmb3IgdGhlIExhcmF2ZWwgaG9tZSBhc3NpZ25tZW50IG9mIHRoZSBXZWIgZW5naW5lZXJpbmcgY291cnNlLgpCeSBzdWJtaXR0aW5nIHRoaXMgYXNzaWdubWVudCwgSSBhY2tub3dsZWRnZSB0aGF0IEkgaGF2ZSB0YWtlbiBub3RlIG9mIHRoZSBzdGF0ZW1lbnRzIGJlbG93OgoKLSBJIGRlY2xhcmUgdGhhdCB0aGlzIHNvbHV0aW9uIGlzIG15IG93biB3b3JrLgotIEkgaGF2ZSBub3QgY29waWVkIG9yIHVzZWQgdGhpcmQgcGFydHkgc29sdXRpb25zLgotIEkgaGF2ZSBub3QgcGFzc2VkIG15IHNvbHV0aW9uIHRvIG15IGNsYXNzbWF0ZXMsIG5laXRoZXIgIG1hZGUgaXQgcHVibGljLgotIFN0dWRlbnRz4oCZIHJlZ3VsYXRpb24gb2YgRcO2dHbDtnMgTG9yw6FuZCBVbml2ZXJzaXR5IChFTFRFIFJlZ3VsYXRpb25zIFZvbC4gSUkuIDc0L0MuIMKnICkgc3RhdGVzIHRoYXQgYXMgbG9uZyBhcyBhIHN0dWRlbnQgcHJlc2VudHMgYW5vdGhlciBzdHVkZW504oCZcyB3b3JrIC0gb3IgYXQgbGVhc3QgdGhlIHNpZ25pZmljYW50IHBhcnQgb2YgaXQgLSBhcyBoaXMvaGVyIG93biBwZXJmb3JtYW5jZSwgaXQgd2lsbCBjb3VudCBhcyBhIGRpc2NpcGxpbmFyeSBmYXVsdC4gVGhlIG1vc3Qgc2VyaW91cyBjb25zZXF1ZW5jZSBvZiBhIGRpc2NpcGxpbmFyeSBmYXVsdCBjYW4gYmUgZGlzbWlzc2FsIG9mIHRoZSBzdHVkZW50IGZyb20gdGhlIFVuaXZlcnNpdHkuCg==";
 
-    // Nyilatkozat template (<NÉV>, <NEPTUN>, <DATE> mellékelve, amibe behelyettesíthetők az adatok)
+    // Statement preview coded into base64 (with template tags: <NAME>, <NEPTUN>, <DATE>)
     const statement_template = "IyBTdGF0ZW1lbnQKCkksIDxOQU1FPiAoTmVwdHVuIGNvZGU6IDxORVBUVU4+KSwgZGVjbGFyZSB0aGF0IEkgaGF2ZSBzdWJtaXR0ZWQgdGhpcyBzb2x1dGlvbiBmb3IgdGhlIExhcmF2ZWwgaG9tZSBhc3NpZ25tZW50IG9mIHRoZSBXZWIgZW5naW5lZXJpbmcgY291cnNlLgpCeSBzdWJtaXR0aW5nIHRoaXMgYXNzaWdubWVudCwgSSBhY2tub3dsZWRnZSB0aGF0IEkgaGF2ZSB0YWtlbiBub3RlIG9mIHRoZSBzdGF0ZW1lbnRzIGJlbG93OgoKLSBJIGRlY2xhcmUgdGhhdCB0aGlzIHNvbHV0aW9uIGlzIG15IG93biB3b3JrLgotIEkgZGVjbGFyZSB0aGF0IEkgaGF2ZSBub3QgY29waWVkIG9yIHVzZWQgdGhpcmQgcGFydHkgc29sdXRpb25zLgotIEkgZGVjbGFyZSB0aGF0IEkgaGF2ZSBub3QgcGFzc2VkIG15IHNvbHV0aW9uIHRvIG15IGNsYXNzbWF0ZXMsIG5laXRoZXIgIG1hZGUgaXQgcHVibGljLgotIEkgYWNrbm93bGVkZ2VkIHRoYXQgdGhlIFN0dWRlbnRz4oCZIHJlZ3VsYXRpb24gb2YgRcO2dHbDtnMgTG9yw6FuZCBVbml2ZXJzaXR5IChFTFRFIFJlZ3VsYXRpb25zIFZvbC4gSUkuIDc0L0MuIMKnICkgc3RhdGVzIHRoYXQgYXMgbG9uZyBhcyBhIHN0dWRlbnQgcHJlc2VudHMgYW5vdGhlciBzdHVkZW504oCZcyB3b3JrIC0gb3IgYXQgbGVhc3QgdGhlIHNpZ25pZmljYW50IHBhcnQgb2YgaXQgLSBhcyBoaXMvaGVyIG93biBwZXJmb3JtYW5jZSwgaXQgd2lsbCBjb3VudCBhcyBhIGRpc2NpcGxpbmFyeSBmYXVsdC4gCi0gSSBhY2tub3dsZWRnZWQgdGhhdCB0aGUgbW9zdCBzZXJpb3VzIGNvbnNlcXVlbmNlIG9mIGEgZGlzY2lwbGluYXJ5IGZhdWx0IGNhbiBiZSBkaXNtaXNzYWwgb2YgdGhlIHN0dWRlbnQgZnJvbSB0aGUgVW5pdmVyc2l0eS4KCkRhdGVkOiA8REFURT4K";
 
-    // Azok a mappák, amelyeknek mindenképpen jelen kell lenniük a zippelés pillanatában. Ha valamelyik nem található, akkor a hallgató hibát kap, és a rendszer kiírja neki, hogy melyek azok a mappák, amik ezek közül hiányoznak.
+    // The folders that should be present at the time of zipping. If any of these are not found, the student will receive an error and the system writes to the console which folders are missing.
     const required_dirs = [
         'app',
         'app/Console',
@@ -64,7 +64,7 @@ class zip extends Command
         //'tests/Unit',
     ];
 
-    // Azok a fájlok, amelyeknek mindenképpen jelen kell lenniük a zippelés pillanatában. Ha valamelyik nem található, akkor a hallgató hibát kap, és a rendszer kiírja neki, hogy melyek azok a fájlok, amik ezek közül hiányoznak.
+    // The files that should be present at the time of zipping. If any of these are not found, the student will receive an error and the system writes to the console which files are missing.
     const required_files = [
         //'.editorconfig',
         '.env.example',
@@ -153,27 +153,27 @@ class zip extends Command
     }
 
     private function scanProject() {
-        // Project beolvasása
+        // Collect project files, omitting items marked by .gitignore files.
         $this->content = $this->scan('.', [
             Gitignore::loadFromStrings([
                 '.git',
                 'app/Console/Commands/zip.php'
             ])
         ]);
-        // STATEMENT.txt hozzáadása utólag, mivel szerepel a .gitignore-ban
+        // Add the STATEMENT.txt file separately at the end of the scan.
         $this->content['files'][] = 'STATEMENT.txt';
     }
 
-    // Validálással kibővített console ask
+    // Console ask with built-in validation.
     private function validatedAsk($question, $rules, $messages = []) {
         $value = $this->ask($question);
         $validator = Validator::make(
-            ['field' => $value], // értékek
-            ['field' => $rules], // szabályok
-            $messages            // hibaüzenetek
+            ['field' => $value], // array of values
+            ['field' => $rules], // array of rules
+            $messages            // array of error messages
         );
         if ($validator->fails()) {
-            // Minden előfodruló hiba megjelenítése
+            // Write errors to the console.
             foreach ($validator->errors()->all() as $error) {
                 $this->error($error);
             }
@@ -183,7 +183,7 @@ class zip extends Command
     }
 
     private function statement() {
-        // Ha valaki egyszer már végigment a kitöltési folyamaton, akkor generálódott egy checksum. Ilyenkor, mivel a validált folyamaton ment keresztül, feltételezzük, hogy a kitöltés helyes volt, ezért csak visszaellenőrizzük, hogy a checksum egyezik-e (nem változott azóta a fájl), hogy ne kelljen minden alkalommal újra kitöltenie a nyilatkozatos formot a hallgatónak.
+        // First, it is necessary to check if the statement has been filled in before.
         if (file_exists(base_path('STATEMENT.txt')) && Cache::has('statement_checksum') && Cache::has('statement_name') && Cache::has('statement_neptun_code')) {
             $checksum = Cache::get('statement_checksum');
             $name = Cache::get('statement_name');
@@ -201,56 +201,66 @@ class zip extends Command
                 }
             }
         }
-        // Nyilatkozat megjelenítése a hallgatónak, majd az elfogadás, és az adatok bekérése
+
+        // Show a preview of the statement.
         $this->line('STATEMENT:');
         $this->newLine();
         $this->line(base64_decode(self::statement_preview));
         $this->newLine();
-        if ($this->confirm('Have you read, accept and consider the above statement on you?')) {
-            $this->info("Please enter your name and Neptun code so we can replace them in the statement.");
-            // Név bekérése
-            $name = $this->validatedAsk('What is your name?', [
-                'required',
-                'min:3',
-                'max:128',
-                'regex:/^[\pL\s\-]+$/u'
-            ], [
-                'required' => 'The name is required.',
-                'min' => 'Name should be at least :min characters long.',
-                'max' => 'The name cannot be longer than :max characters.',
-                'regex' => 'The name can consist of alphanumeric characters and spaces.'
-            ]);
-            // Neptun kód bekérése
-            $neptun = Str::upper($this->validatedAsk('What is your Neptun code?', [
-                'required',
-                'string',
-                'size:6',
-                'regex:/[a-zA-Z0-9]/'
-            ], [
-                'required' => 'The Neptun code is required.',
-                'size' => 'Neptun code has an exact length of :size characters.',
-                'regex' => 'The Neptun code can only consist of A-Z characters and numbers.'
-            ]));
-            // Aktuális dátum
-            $date = Carbon::now('Europe/Budapest')->isoFormat('Y. MM. DD. kk:MM:ss');
-            // Nyilatkozat kitöltése
-            $filled_statement = Str::of(base64_decode(self::statement_template))
-                ->replace('<NAME>', $name)
-                ->replace('<NEPTUN>', $neptun)
-                ->replace('<DATE>', $date);
-            // Adatok tárolása
-            file_put_contents(base_path('STATEMENT.txt'), $filled_statement);
-            Cache::set('statement_checksum', sha1($filled_statement));
-            Cache::set('statement_name', $name);
-            Cache::set('statement_neptun_code', $neptun);
-            //
-            $this->io->success("The statement was successfully filled in with the name " . $name ." and Neptun code " . $neptun . ".");
-            $this->io->note("If the above information is incorrect, delete the STATEMENT.txt file and call the zip command again, and the statement filler will reappear.");
-        } else {
+
+        // Requesting consent from the student.
+        if (!$this->confirm('Have you read, accept and consider the above statement on you?')) {
             $this->error('The statement is required according to the requirements of the subject to be submitted and to obtain the grade.');
+            // Fill failed.
             return false;
         }
+
+        // Collecting the data set needed to complete the statement.
+        $this->info("Please enter your name and Neptun code so we can replace them in the statement.");
+        // Obtain student's name.
+        $name = $this->validatedAsk('What is your name?', [
+            'required',
+            'min:3',
+            'max:128',
+            'regex:/^[\pL\s\-]+$/u'
+        ], [
+            'required' => 'The name is required.',
+            'min' => 'Name should be at least :min characters long.',
+            'max' => 'The name cannot be longer than :max characters.',
+            'regex' => 'The name can consist of alphanumeric characters and spaces.'
+        ]);
+        // Obtain student's Neptun code.
+        $neptun = Str::upper($this->validatedAsk('What is your Neptun code?', [
+            'required',
+            'string',
+            'size:6',
+            'regex:/[a-zA-Z0-9]/'
+        ], [
+            'required' => 'The Neptun code is required.',
+            'size' => 'Neptun code has an exact length of :size characters.',
+            'regex' => 'The Neptun code can only consist of A-Z characters and numbers.'
+        ]));
+        // Obtain current date.
+        $date = Carbon::now('Europe/Budapest')->isoFormat('Y. MM. DD. kk:mm:ss');
+
+        // Filling in the statement template with the received data.
+        $filled_statement = Str::of(base64_decode(self::statement_template))
+            ->replace('<NAME>', $name)
+            ->replace('<NEPTUN>', $neptun)
+            ->replace('<DATE>', $date);
+
+        // Store statement.
+        file_put_contents(base_path('STATEMENT.txt'), $filled_statement);
+        Cache::set('statement_checksum', sha1($filled_statement));
+        Cache::set('statement_name', $name);
+        Cache::set('statement_neptun_code', $neptun);
+
+        // Final notes.
+        $this->io->success("The statement was successfully filled in with the name " . $name ." and Neptun code " . $neptun . ".");
+        $this->io->note("If the above information is incorrect, delete the STATEMENT.txt file and call the zip command again, and the statement filler will reappear.");
         $this->newLine();
+
+        // The statement was completed successfully.
         return true;
     }
 
@@ -269,32 +279,32 @@ class zip extends Command
             'dirs' => [],
         ];
 
-        // .gitignore begyűjtése, ha van
+        // Parse the gitignore file in the current folder, if it exists.
         $gitignore_path = $current_directory . '/' . '.gitignore';
         if (file_exists(base_path($gitignore_path))) {
             $gitignores[] = Gitignore::loadFromString(file_get_contents($gitignore_path));
         }
 
-        // Aktuális mappa szkennelése
+        // Scan current folder.
         $current_content = array_diff(scandir(base_path($current_directory)), array('..', '.'));
         foreach ($current_content as $item) {
-            $item_path = str_replace('./', '', $current_directory . '/' . $item);
+            $current_item = str_replace('./', '', $current_directory . '/' . $item);
 
-            // Symlink-ek kihagyása
-            if (is_link($item_path)) continue;
+            // Skip symbolic links.
+            if (is_link($current_item)) continue;
 
-            // Fájlok összegyűjtése a jelenlegi mappán belül
-            if (is_file($item_path)) {
-                if ($this->ignored($item_path, $gitignores)) continue;
-                $result['files'][] = $item_path;
+            // Collect files within the current folder.
+            if (is_file($current_item)) {
+                if ($this->ignored($current_item, $gitignores)) continue;
+                $result['files'][] = $current_item;
             }
-            // Mappák összegyűjtése a jelenlegi mappán belül
-            else if (is_dir($item_path)) {
-                if ($this->ignored($item_path, $gitignores)) continue;
-                $result['dirs'][] = $item_path;
-                // ha nincs kihagyva a mappa, olvassuk be a tartalmát
+            // Collect folders within the current folder.
+            else if (is_dir($current_item)) {
+                if ($this->ignored($current_item, $gitignores)) continue;
+                $result['dirs'][] = $current_item;
+                // Discover folders recursively.
                 $dir_content = $this->scan(
-                    $item_path,
+                    $current_item,
                     $gitignores
                 );
                 $result['files'] = array_merge($result['files'], $dir_content['files']);
@@ -307,19 +317,19 @@ class zip extends Command
     private function check() {
         $error = false;
 
-        // Megnézzük, hogy mi a szükséges mappák és a projektben fellelhető mappák metszete
+        // Let's look at the intersection of the required folders and the folders in the project:
         $common_dirs = array_intersect(self::required_dirs, $this->content['dirs']);
-        // ...és ha ez a metszet nem adja vissza a teljes requiredDirs-t (a szükséges mappákat), akkor bizony hiányzik valami...
+        // ... and this intersect must contain all of the required folders ...
         $dirs_diff = array_diff(self::required_dirs, $common_dirs);
         if (count($dirs_diff) > 0) {
             $error = true;
             $this->io->error([
-                'Ezekre a mappákra szükség van:',
+                'These folders are required:',
                 ...$dirs_diff
             ]);
         }
 
-        // Ugyanaz a logika, mint a mappáknál feljebb
+        // Same logic
         $common_files = array_intersect(self::required_files, $this->content['files']);
         $files_diff = array_diff(self::required_files, $common_files);
         if (count($files_diff) > 0) {
@@ -337,17 +347,18 @@ class zip extends Command
     }
 
     private function zip() {
-        // zipfiles elkészítése, ha még nem létezik
+        // Create a "zipfiles" folder if it does not already exist
         if (!(file_exists(base_path('zipfiles')) && is_dir(base_path('zipfiles')))) {
             mkdir(base_path('zipfiles'));
             $this->info("zipfiles folder created for zip files");
         }
-        // Adatok összegyűjtése
-        $date = Carbon::now('Europe/Budapest')->isoFormat('YMMDD_kkMMssS');
+
+        // Collect data.
+        $date = Carbon::now('Europe/Budapest')->isoFormat('YMMDD_kkmmssS');
         $neptun = Cache::get('statement_neptun_code');
         $zip_name = base_path("zipfiles" . "/" . $neptun . "_Laravel_" . $date . ".zip");
 
-        // Becsomagolás
+        // Zipping
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         foreach ($this->content['files'] as $file) {
@@ -355,13 +366,13 @@ class zip extends Command
         }
         $zip->close();
 
-        // zip méretének ellenőrzése
+        // Check .zip file size
         $zip_size = \ByteUnits\bytes(filesize($zip_name));
         $this->io->success('The zip file is complete: ' . $zip_name . ' (size: ' . $zip_size->format('kB') . ')');
         $this->io->note('Proper and complete submission of the assignment is the responsibility of the student, so be sure to check it before submitting!');
         $this->io->note('It’s best to unzip and install with the commands you see in the task to see if everything works fine!');
 
-        // Nagy méretű zip fájl esetén figyelmeztessük a hallgatót, valószínűleg bennehagyott valamit, amire nincs is szükség
+        // Warn the student if the zip file is large. In this case, the zip file may contain items that are not needed.
         if ($zip_size->isGreaterThan(\ByteUnits\Binary::megabytes(2))) {
             $this->io->warning('The size of the zip file is larger than usual, please check if there are any unnecessary things in it, e.g. pictures, etc!');
         } else if ($zip_size->isGreaterThan(\ByteUnits\Binary::megabytes(10))) {
@@ -370,6 +381,7 @@ class zip extends Command
         return true;
     }
 
+    // Handle Artisan command
     public function handle() {
         $this->io = new SymfonyStyle($this->input, $this->output);
         $this->io->title('Web engineering - Automatic zipper for Laravel');
