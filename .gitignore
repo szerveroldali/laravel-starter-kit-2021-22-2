@@ -25,6 +25,7 @@ package-lock.json
 /public/js
 /public/fonts
 /public/webfonts
+/public/mix-manifest.json
 
 # Local History for Visual Studio Code
 .history/
